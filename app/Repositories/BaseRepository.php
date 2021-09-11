@@ -89,9 +89,9 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->create($data);
     }
 
-    public function update(int $uuid, array $request)
+    public function update(int $id, array $request)
     {
-        $model = $this->findWhereFirst('uuid', $uuid);
+        $model = $this->findWhereFirst('id', $id);
 
         if(!$model) {
             return false;
