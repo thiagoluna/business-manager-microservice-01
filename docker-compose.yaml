@@ -11,12 +11,14 @@ services:
       - _DB_DATABASE=micro01
       - _DB_USERNAME=root
       - _DB_PASSWORD=root
+      - _REDIS_HOST=micro01-redis
     volumes:
       - .:/var/www
     networks:
       - app-network
     depends_on:
       - db
+      - redis
 
   nginx:
     build: .docker/nginx
@@ -47,6 +49,31 @@ services:
       - MYSQL_ROOT_USER=root
     networks:
       - app-network
+
+  redis:
+    image: redis:latest
+    container_name: micro01-redis
+    networks:
+      - app-network
+
+  worker:
+    build: .
+    container_name: micro01-worker
+    entrypoint: dockerize -template ./.docker/app/.env:.env -wait tcp://db:3306 -timeout 40s ./.docker/entrypoint.sh
+    environment:
+      - _DB_HOST=db
+      - _DB_DATABASE=micro01
+      - _DB_USERNAME=root
+      - _DB_PASSWORD=root
+      - _REDIS_HOST=micro01-redis
+    command: "php artisan queue:work"
+    volumes:
+      - .:/var/www
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - redis
 
 networks:
   app-network:
