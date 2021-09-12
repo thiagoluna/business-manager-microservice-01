@@ -15,9 +15,15 @@ services:
       - _MAIL_DRIVER=smtp
       - _MAIL_HOST=smtp.gmail.com
       - _MAIL_PORT=587
-      - _MAIL_USERNAME=thiagoluna2@gmail.com
-      - _MAIL_PASSWORD=lribqbqcccvrlrjb
+      - _MAIL_USERNAME=
+      - _MAIL_PASSWORD=
       - _MAIL_ENCRYPTION=tls
+      - _RABBITMQ_HOST=cattle.rmq2.cloudamqp.com
+      - _RABBITMQ_PORT=5672
+      - _RABBITMQ_USER=
+      - _RABBITMQ_PASSWORD=
+      - _RABBITMQ_VHOST=
+      - _RABBITMQ_QUEUE=admin_queue
     volumes:
       - .:/var/www
     networks:
@@ -76,8 +82,8 @@ services:
       - _MAIL_DRIVER=smtp
       - _MAIL_HOST=smtp.gmail.com
       - _MAIL_PORT=587
-      - _MAIL_USERNAME=email@gmail.com
-      - _MAIL_PASSWORD=password
+      - _MAIL_USERNAME=thiagoluna2@gmail.com
+      - _MAIL_PASSWORD=lribqbqcccvrlrjb
       - _MAIL_ENCRYPTION=tls
     restart: unless-stopped
     volumes:
