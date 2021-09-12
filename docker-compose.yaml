@@ -12,6 +12,12 @@ services:
       - _DB_USERNAME=root
       - _DB_PASSWORD=root
       - _REDIS_HOST=micro01-redis
+      - _MAIL_DRIVER=smtp
+      - _MAIL_HOST=smtp.gmail.com
+      - _MAIL_PORT=587
+      - _MAIL_USERNAME=thiagoluna2@gmail.com
+      - _MAIL_PASSWORD=lribqbqcccvrlrjb
+      - _MAIL_ENCRYPTION=tls
     volumes:
       - .:/var/www
     networks:
@@ -19,6 +25,7 @@ services:
     depends_on:
       - db
       - redis
+      - worker
 
   nginx:
     build: .docker/nginx
@@ -59,14 +66,20 @@ services:
   worker:
     build: .
     container_name: micro01-worker
-    entrypoint: dockerize -template ./.docker/app/.env:.env -wait tcp://db:3306 -timeout 40s ./.docker/entrypoint.sh
+    entrypoint: dockerize -template ./.docker/app/.env:.env -wait tcp://db:3306 -timeout 40s ./.docker/entrypoint.worker.sh
     environment:
       - _DB_HOST=db
       - _DB_DATABASE=micro01
       - _DB_USERNAME=root
       - _DB_PASSWORD=root
       - _REDIS_HOST=micro01-redis
-    command: "php artisan queue:work"
+      - _MAIL_DRIVER=smtp
+      - _MAIL_HOST=smtp.gmail.com
+      - _MAIL_PORT=587
+      - _MAIL_USERNAME=email@gmail.com
+      - _MAIL_PASSWORD=password
+      - _MAIL_ENCRYPTION=tls
+    restart: unless-stopped
     volumes:
       - .:/var/www
     networks:

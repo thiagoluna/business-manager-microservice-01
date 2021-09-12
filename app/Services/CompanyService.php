@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Repositories\Contracts\CompanyRepositoryInterface;
 
 class CompanyService
@@ -26,15 +27,9 @@ class CompanyService
         return $this->companyRepository->findWhereFirst("uuid", $uuid);
     }
 
-    public function store($request) : bool
+    public function store($request) : Company
     {
-        $company = $this->companyRepository->store($request);
-
-        if (!$company) {
-            return false;
-        }
-
-        return true;
+        return $this->companyRepository->store($request);
     }
 
     public function updateByUuid(string $uuid, array  $request) : bool

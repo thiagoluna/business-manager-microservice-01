@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Resources\CompanyResource;
+use App\Jobs\CompanyWasCreatedJob;
 use App\Services\CompanyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,8 @@ class CompanyController extends Controller
         if (!$company) {
             return response()->json(["error" => "Not Saved."], '500');
         }
+
+        CompanyWasCreatedJob::dispatch($company->email);
 
         return response()->json(["success" => "Company Created!"], '201');
     }
