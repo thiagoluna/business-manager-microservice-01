@@ -26,6 +26,7 @@ class CompanyController extends Controller
 
     public function index(Request $request) : ResourceCollection
     {
+        phpinfo();
         $per_page = (int) $request->get('per_page', 15);
         $companies = $this->companyService->index($request->get('filter', ''), $per_page);
 
@@ -34,13 +35,13 @@ class CompanyController extends Controller
 
     public function store(CompanyRequest $request) : JsonResponse
     {
-        $company = $this->companyService->store($request->validated());
+        $company = $this->companyService->store($request->validated(), $request->image);
 
         if (!$company) {
             return response()->json(["error" => "Not Saved."], '500');
         }
 
-        CompanyWasCreatedJob::dispatch($company->email);
+        CompanyWasCreatedJob::dispatch($company->email)->onQueue('email_queue');
 
         return response()->json(["success" => "Company Created!"], '201');
     }
@@ -60,7 +61,7 @@ class CompanyController extends Controller
 
     public function update(CompanyRequest $request, string $uuid) : JsonResponse
     {
-        $company = $this->companyService->updateByUuid($uuid, $request->validated());
+        $company = $this->companyService->updateByUuid($uuid, $request->validated(), $request->image);
 
         if(!$company) {
             return response()->json([
@@ -68,7 +69,7 @@ class CompanyController extends Controller
             ], 404);
         }
 
-        return response()->json(['message' => 'success']);
+        return response()->json(['message' => 'Updated success']);
     }
 
     public function destroy(string $uuid) : JsonResponse

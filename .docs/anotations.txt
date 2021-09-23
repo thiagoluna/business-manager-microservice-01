@@ -3,3 +3,6 @@ https://github.com/docker-library/php/issues/612
 //RabbitMQ
 https://github.com/vyuldashev/laravel-queue-rabbitmq
 composer require vladimir-yuldashev/laravel-queue-rabbitmq
+
+//Link Simbólico
+ls -la public/

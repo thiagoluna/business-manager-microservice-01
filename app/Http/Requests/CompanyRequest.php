@@ -34,11 +34,11 @@ class CompanyRequest extends FormRequest
             'facebook' => ['nullable', "unique:companies,facebook,{$uuid},uuid"],
             'instagram' => ['nullable', "unique:companies,instagram,{$uuid},uuid"],
             'youtube' => ['nullable', "unique:companies,youtube,{$uuid},uuid"],
-            'image' => ['required', 'max:1024'],
+            'image' => ['required', 'image', 'max:1024'],
         ];
 
         if ($this->method() == 'PUT') {
-            $rules['image'] = ['nullable','max:1024'];
+            $rules['image'] = ['nullable', 'image', 'max:1024'];
         }
 
         return $rules;

@@ -6,6 +6,7 @@ namespace Tests\Feature\Api;
 
 use App\Models\Category;
 use App\Models\Company;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class CompanyTest extends TestCase
@@ -65,20 +66,28 @@ class CompanyTest extends TestCase
 
     public function test_store_company() : void
     {
-        $response = $this->postJson("/api/v1/companies/", $this->companyData);
+        $image = UploadedFile::fake()->image('image.png');
+        $response = $this->call(
+            'POST',
+            "/api/v1/companies/",
+            $this->companyData,
+            [],
+            ['image' => $image]
+        );
 
         $response->assertStatus(201);
     }
 
-    public function test_error_id_not_int_update_company() : void
-    {
-        $response = $this->putJson("/api/v1/companies/abc", $this->companyData);
-        $response->assertStatus(404);
-    }
-
     public function test_not_found_update_company() : void
     {
-        $response = $this->putJson("/api/v1/companies/171", $this->companyData);
+        $image = UploadedFile::fake()->image('image.png');
+        $response = $this->call(
+            'PUT',
+            "/api/v1/companies/171",
+            $this->companyData,
+            [],
+            ['image' => $image]
+        );
         $response->assertStatus(404);
     }
 
@@ -109,7 +118,15 @@ class CompanyTest extends TestCase
             "data"        => "2001/01/01"
         ];
 
-        $response = $this->putJson("/api/v1/companies/{$this->company->uuid}", $companyData);
+        $image = UploadedFile::fake()->image('image.png');
+        $response = $this->call(
+            'PUT',
+            "/api/v1/companies/{$this->company->uuid}",
+            $companyData,
+            [],
+            ['image' => $image]
+        );
+
         $response->assertStatus(200);
     }
 
@@ -119,9 +136,9 @@ class CompanyTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_error_id_not_int_delete_company() : void
+    public function test_error_delete_company_not_found() : void
     {
-        $response = $this->deleteJson("/api/v1/companies/abc");
+        $response = $this->deleteJson("/api/v1/companies/wwww-sss-www");
         $response->assertStatus(404);
     }
 }

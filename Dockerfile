@@ -1,28 +1,54 @@
-FROM php:7.3.6-fpm-alpine3.9
+FROM php:7.4-fpm
 
-RUN apk add --no-cache shadow openssl bash mysql-client nodejs npm git autoconf
-RUN docker-php-ext-install pdo pdo_mysql sockets
+# Arguments defined in docker-compose.yml
+ARG user
+ARG uid
 
-RUN touch /home/www-data/.bashrc | echo "PS1='\w\$ '" >> /home/www-data/.bashrc
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    wget \
+    nano
+
+# Xdebug
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
 
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN usermod -u 1000 www-data
+# Create system user to run Composer and Artisan Commands
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
 
 # Install redis
-RUN apk add --no-cache $PHPIZE_DEPS \
-    && echo no | pecl install redis \
-    && docker-php-ext-enable redis
+RUN pecl install -o -f redis \
+    &&  rm -rf /tmp/pear \
+    &&  docker-php-ext-enable redis
 
+# Xdebug
+ADD xdebug.ini /usr/local/etc/php/conf.d/
+RUN echo "include_path=/usr/local/etc/php/conf.d/xdebug.ini" >> /usr/local/etc/php/php.ini
+
+# Set working directory
 WORKDIR /var/www
 
-RUN rm -rf /var/www/html && ln -s public html
-
-USER www-data
-
-EXPOSE 9000
+USER $user
